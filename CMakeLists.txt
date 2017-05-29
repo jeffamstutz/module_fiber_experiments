@@ -24,6 +24,13 @@ if (OSPRAY_MODULE_FIBER)
 
   include_directories(${Boost_INCLUDE_DIRS})
 
+  ospray_create_application(ospFiberingConcurrentFor
+    concurrent_for.cpp
+  LINK
+    ospray_common
+    ${Boost_LIBRARIES}
+  )
+
   ospray_create_application(ospFiberingPriority
     priority.cpp
   LINK
