@@ -31,13 +31,6 @@ if (OSPRAY_MODULE_FIBER)
     ${Boost_LIBRARIES}
   )
 
-  ospray_create_application(ospFiberingPriority
-    priority.cpp
-  LINK
-    ospray_common
-    ${Boost_LIBRARIES}
-  )
-
   ospray_create_application(ospFiberingRangeFor
     range_for.cpp
   LINK
