@@ -19,13 +19,21 @@ inline void concurrent_for(int nFibers, TASK_T&& fcn)
 
 int main()
 {
-  int value = 0;
+  int value = N_FIBERS;
 
   concurrent_for(N_FIBERS, [&]() {
     while (value < MAX_VALUE) {
-      value++;
+      value--;
+
       std::cout << "fiber[" << boost::this_fiber::get_id() << "] "
                 << "value now is " << value << std::endl;
+
+      concurrent_for(2, [&]() {
+        value++;
+        std::cout << "...subfiber[" << boost::this_fiber::get_id() << "] "
+                  << "value now is " << value << std::endl;
+      });
+
       boost::this_fiber::yield();
     }
   });
