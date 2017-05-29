@@ -18,16 +18,32 @@ option(OSPRAY_MODULE_FIBER "Build 'Fibering' Module" ON)
 
 if (OSPRAY_MODULE_FIBER)
 
-  ospray_build_component(ospcommon)
-
   find_package(Boost REQUIRED COMPONENTS fiber)
 
   include_directories(${Boost_INCLUDE_DIRS})
 
-  ospray_create_application(ospFibering
-    fibering.cpp
+  ospray_create_application(ospFiberingPriority
+    priority.cpp
   LINK
-    ospray_common
+    ${Boost_LIBRARIES}
+  )
+
+  ospray_create_application(ospFiberingRangeFor
+    range_for.cpp
+  LINK
+    ${Boost_LIBRARIES}
+  )
+
+  ospray_create_application(ospFiberingSimple
+    simple.cpp
+  LINK
+    ${Boost_LIBRARIES}
+  )
+
+  ospray_create_application(ospFiberingWorkSharing
+    barrier.hpp
+    work_sharing.cpp
+  LINK
     ${Boost_LIBRARIES}
   )
 
