@@ -18,6 +18,8 @@ option(OSPRAY_MODULE_FIBER "Build 'Fibering' Module" ON)
 
 if (OSPRAY_MODULE_FIBER)
 
+  ospray_build_component(ospcommon)#Link ospcommon to bring in pthreads...
+
   find_package(Boost REQUIRED COMPONENTS fiber)
 
   include_directories(${Boost_INCLUDE_DIRS})
@@ -25,18 +27,21 @@ if (OSPRAY_MODULE_FIBER)
   ospray_create_application(ospFiberingPriority
     priority.cpp
   LINK
+    ospray_common
     ${Boost_LIBRARIES}
   )
 
   ospray_create_application(ospFiberingRangeFor
     range_for.cpp
   LINK
+    ospray_common
     ${Boost_LIBRARIES}
   )
 
   ospray_create_application(ospFiberingSimple
     simple.cpp
   LINK
+    ospray_common
     ${Boost_LIBRARIES}
   )
 
@@ -44,6 +49,7 @@ if (OSPRAY_MODULE_FIBER)
     barrier.hpp
     work_sharing.cpp
   LINK
+    ospray_common
     ${Boost_LIBRARIES}
   )
 

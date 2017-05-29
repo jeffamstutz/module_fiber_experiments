@@ -10,7 +10,6 @@
 #include <algorithm>
 
 #include <boost/fiber/all.hpp>
-#include <boost/fiber/scheduler.hpp>
 #include <boost/noncopyable.hpp>
 
 class Verbose: public boost::noncopyable
@@ -78,7 +77,7 @@ class priority_scheduler :
     public boost::fibers::algo::algorithm_with_properties<priority_props>
 {
 private:
-    using rqueue_t = boost::fibers::scheduler::ready_queue_type;
+    using rqueue_t = boost::fibers::scheduler::ready_queue_t;
 
     rqueue_t                    rqueue_;
     std::mutex                  mtx_{};
