@@ -129,7 +129,7 @@ int main()
     ::fibers.clearFibers();
   });
 
-  int value = N_FIBERS;
+  int value = 0;
 
   concurrent_for(N_FIBERS, [&](int whichFiber) {
     while (value < MAX_VALUE) {
@@ -146,10 +146,8 @@ int main()
   std::cout << "starting another concurrent_for()..." << std::endl;
   std::cout << std::endl;
 
-  value = N_FIBERS;
-
   concurrent_for(N_FIBERS, [&](int whichFiber) {
-    while (value < MAX_VALUE) {
+    while (value < 2*MAX_VALUE) {
       value++;
 
       std::cout << "fiber[" << whichFiber << "] "
