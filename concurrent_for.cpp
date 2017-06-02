@@ -5,10 +5,7 @@
 
 #include "ospcommon/utility/OnScopeExit.h"
 
-#define DEBUG_OUTPUTS  1
-
-const int N_FIBERS  = 3;
-const int MAX_VALUE = 10;
+#define DEBUG_OUTPUTS 0
 
 thread_local static std::function<void(int)> currentFiberTask;
 thread_local static bool newTask = false;
@@ -132,10 +129,12 @@ int main()
     ::fibers.clearFibers();
   });
 
-  int value = 0;
+  const int N_FIBERS  = 3;
+        int max_value = 10;
+        int value     = 0;
 
   auto coop_increment = [&](int whichFiber) {
-    while (value < MAX_VALUE) {
+    while (value < max_value) {
       value++;
 
       std::cout << "fiber[" << whichFiber << "] "
@@ -150,6 +149,8 @@ int main()
   std::cout << std::endl;
   std::cout << "starting another concurrent_for()..." << std::endl;
   std::cout << std::endl;
+
+  max_value *= 2;
 
   concurrent_for(N_FIBERS, coop_increment);
 
