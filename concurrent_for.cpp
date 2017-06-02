@@ -5,7 +5,7 @@
 
 #include "ospcommon/utility/OnScopeExit.h"
 
-#define DEBUG_OUTPUTS  0
+#define DEBUG_OUTPUTS  1
 
 const int N_FIBERS  = 3;
 const int MAX_VALUE = 10;
@@ -48,7 +48,7 @@ struct FiberGroup
 
 thread_local static FiberGroup fibers;
 
-void fiber_fcn(int whichFiber)
+void fiber_fcn(int whichFiber, int numSiblingFibers)
 {
   while (true) {
     if (cancelFibers)
@@ -73,7 +73,9 @@ void fiber_fcn(int whichFiber)
     std::cout << "finished task on fiber[" << whichFiber << "]" << std::endl;
 #endif
     numFinishedFibers++;
-    newTask = false;
+
+    if (numFinishedFibers == numSiblingFibers)
+      newTask = false;
 #if DEBUG_OUTPUTS
     std::cout << "incrementing num finished from fiber[" << whichFiber << "] "
               << numFinishedFibers << std::endl;;
@@ -94,7 +96,8 @@ inline void concurrent_for(int nFibers, TASK_T&& fcn)
 
     int whichFiber = 0;
     for (auto &fiber : ::fibers.activeFibers)
-      fiber = fibers::fiber(fibers::launch::post, fiber_fcn, whichFiber++);
+      fiber = fibers::fiber(fibers::launch::post, fiber_fcn,
+                            whichFiber++, nFibers);
   } else {
 #if DEBUG_OUTPUTS
     std::cout << "IGNORING FIBER RESIZE!!!!!!!!!!" << std::endl;
@@ -131,7 +134,7 @@ int main()
 
   int value = 0;
 
-  concurrent_for(N_FIBERS, [&](int whichFiber) {
+  auto coop_increment = [&](int whichFiber) {
     while (value < MAX_VALUE) {
       value++;
 
@@ -140,22 +143,15 @@ int main()
 
       boost::this_fiber::yield();
     }
-  });
+  };
+
+  concurrent_for(N_FIBERS, coop_increment);
 
   std::cout << std::endl;
   std::cout << "starting another concurrent_for()..." << std::endl;
   std::cout << std::endl;
 
-  concurrent_for(N_FIBERS, [&](int whichFiber) {
-    while (value < 2*MAX_VALUE) {
-      value++;
-
-      std::cout << "fiber[" << whichFiber << "] "
-                << "value now is " << value << std::endl;
-
-      boost::this_fiber::yield();
-    }
-  });
+  concurrent_for(N_FIBERS, coop_increment);
 
   std::cout << "...done" << std::endl;
 
