@@ -138,7 +138,7 @@ int main()
 
   double x = 1.0;
 
-  auto coop_increment = [&](int whichFiber) {
+  auto coop_increment = [&](int) {
     while (value < max_value) {
       value++;
       x = sin(x);
@@ -164,11 +164,13 @@ int main()
     }
   };
 
+  std::function<void()> fcn = regular_fcn;
+
   value = 0;
   x     = 1.0;
 
   timer.start();
-  regular_fcn();
+  fcn();
   timer.stop();
 
   auto while_time = timer.seconds();
