@@ -121,6 +121,16 @@ inline void concurrent_for(int nFibers, TASK_T&& fcn)
 
 // Client code ////////////////////////////////////////////////////////////////
 
+double doSomeWork(double v)
+{
+  for (int i = 0; i < 10; ++i) {
+    v = sin(v);
+    v = tan(v);
+    v = cos(v);
+  }
+  return v;
+}
+
 int main()
 {
   ospcommon::utility::OnScopeExit onExit([&](){
@@ -131,7 +141,7 @@ int main()
   });
 
   const int N_FIBERS = 64;
-  size_t max_value = 1e8;
+  size_t max_value = 1e6;
   size_t value     = 0;
 
   std::cout << "testing " << max_value << " iterations..." << std::endl;
@@ -141,7 +151,7 @@ int main()
   auto coop_increment = [&](int) {
     while (value < max_value) {
       value++;
-      x = sin(x);
+      x = doSomeWork(x);
       boost::this_fiber::yield();
     }
   };
@@ -160,7 +170,7 @@ int main()
   auto regular_fcn = [&]() {
     while (value < max_value) {
       value++;
-      x = sin(x);
+      x = doSomeWork(x);
     }
   };
 
