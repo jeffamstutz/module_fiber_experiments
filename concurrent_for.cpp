@@ -4,6 +4,7 @@
 #include <boost/fiber/all.hpp>
 
 #include "ospcommon/utility/OnScopeExit.h"
+#include "ospcommon/utility/CodeTimer.h"
 
 #define DEBUG_OUTPUTS 0
 
@@ -129,30 +130,53 @@ int main()
     ::fibers.clearFibers();
   });
 
-  const int N_FIBERS  = 3;
-        int max_value = 10;
-        int value     = 0;
+  const int N_FIBERS = 64;
+  size_t max_value = 1e8;
+  size_t value     = 0;
+
+  std::cout << "testing " << max_value << " iterations..." << std::endl;
+
+  double x = 1.0;
 
   auto coop_increment = [&](int whichFiber) {
     while (value < max_value) {
       value++;
-
-      std::cout << "fiber[" << whichFiber << "] "
-                << "value now is " << value << std::endl;
-
+      x = sin(x);
       boost::this_fiber::yield();
     }
   };
 
+  ospcommon::utility::CodeTimer timer;
+
+  timer.start();
   concurrent_for(N_FIBERS, coop_increment);
+  timer.stop();
 
-  std::cout << std::endl;
-  std::cout << "starting another concurrent_for()..." << std::endl;
-  std::cout << std::endl;
+  auto fiber_time = timer.seconds();
 
-  max_value *= 2;
+  std::cout << "concurrent_for() : " << fiber_time << " : x == "
+            << x << std::endl;
 
-  concurrent_for(N_FIBERS, coop_increment);
+  auto regular_fcn = [&]() {
+    while (value < max_value) {
+      value++;
+      x = sin(x);
+    }
+  };
+
+  value = 0;
+  x     = 1.0;
+
+  timer.start();
+  regular_fcn();
+  timer.stop();
+
+  auto while_time = timer.seconds();
+
+  std::cout << "         while() : " << while_time << " : x == "
+            << x << std::endl;
+
+  std::cout << "fiber perf : " << while_time / fiber_time << 'x' << std::endl;
 
   std::cout << "...done" << std::endl;
 
